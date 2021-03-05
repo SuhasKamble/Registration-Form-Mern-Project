@@ -4,10 +4,10 @@ require('./db/conn')
 const Register = require("./models/regsiter")
 const path = require("path");
 const hbs = require("hbs");
+const async = require('hbs/lib/async');
+const bcrypt = require("bcryptjs");
 
 const port = process.env.PORT || 3000;
-
-
 const static_path = path.join(__dirname,"../public")
 const template_path = path.join(__dirname,"../templates/views")
 const partial_path = path.join(__dirname,"../templates/partials")
@@ -52,6 +52,24 @@ app.post("/register",async(req,res)=>{
             res.send("Password do not match!");
         }
         res.render("index")
+    } catch (error) {
+        console.log(error)
+        res.send(error)
+    }
+})
+
+
+app.post("/login",async(req,res)=>{
+    try {
+        const email = req.body.email;
+        const password  = req.body.password;
+        const userEmail = await Register.findOne({email:email})
+        const isMatch = bcrypt.compare(password,userEmail.password)
+        if(isMatch){
+            res.render("index")
+        }else{
+            res.send("Invalid login details")
+        }
     } catch (error) {
         console.log(error)
         res.send(error)
